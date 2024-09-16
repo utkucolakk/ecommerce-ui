@@ -64,7 +64,7 @@ async function fetchProductByCategory(categoryId) {
     categories.forEach(category => {
         const option = document.createElement("option");
         option.value = category.id;
-        option.text = category.categoryEnum;
+        option.text = category.name;
         categorySelect.appendChild(option);
     });
 }
@@ -74,12 +74,16 @@ function displayProducts(products) {
     productList.innerHTML = '';
     products.forEach(product => {
         const productCart = document.createElement("div");
-        productCart.classList.add("col-md-6", "mb-4");
+        productCart.classList.add("col-md-3", "mb-4");
+
+        const card = document.createElement("div");
+        card.classList.add("card");
 
         const productImage = document.createElement("img");
-        productImage.src = BASE_IMAGE_PATH + product.image
+        productImage.src = BASE_IMAGE_PATH + product.image;
         productImage.alt = product.name;
-        productImage.style.maxWidth = "150px";
+        productImage.classList.add("card-img-top");
+        productImage.style.maxWidth = "100%";
         productImage.style.maxHeight = "150px";
 
         const cardBoyd = document.createElement("div");
@@ -90,8 +94,10 @@ function displayProducts(products) {
             <button class="btn btn-primary" onclick='addToCart(${JSON.stringify(product)})'>Add to Cart</button>
         `;
 
-        productCart.appendChild(productImage);
-        productCart.appendChild(cardBoyd);
+        card.appendChild(productImage);
+        card.appendChild(cardBoyd);
+        productCart.appendChild(card);
+
         
         productList.appendChild(productCart);
 
