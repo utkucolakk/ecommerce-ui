@@ -1,4 +1,4 @@
-const jwtToken = localStorage.getItem("jwtToken");
+const jwtToken = localStorage.getItem('jwtToken');
 const BASE_PATH = "http://localhost:8080/"
 
 function getAllCategory() {
@@ -14,7 +14,7 @@ function getAllCategory() {
         }
         return response.json();
     }).then(categories => {
-        displayCategories(categories);
+        displayCategories(categories)
     }).catch(error => {
         console.error('Error:', error);
     });

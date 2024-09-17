@@ -45,7 +45,7 @@ async function addProduct() {
 
 async function getAllProduct() {
     try {
-        
+
         const response = await fetch(BASE_PATH + "product/all", {
             method: 'GET',
             headers: {
@@ -57,15 +57,16 @@ async function getAllProduct() {
             throw new Error("Failed to get products, response status : " + response.status)
         }
         const productList = await response.json();
-        console.log("productList : ", productList);
+        console.log("productList : ", productList)
         await renderProductTable(productList);
+
     } catch (error) {
         console.log("error : ", error)
     }
 }
 
 async function renderProductTable(productList) {
-    const productTableBody =  document.getElementById('productTableBody');
+    const productTableBody = document.getElementById('productTableBody');
     productTableBody.innerHTML = "";
 
     productList.forEach(product => {
@@ -79,9 +80,9 @@ async function renderProductTable(productList) {
             <td>${product.active ? "Yes" : "No"}</td>
             <td>
                 <button class="btn btn-warning" onclick="updateProduct(${product.id})">Update</button>
-                <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+                <button class="btn btn-danger" onclick="showDeleteProductModal(${product.id})">Delete</button>
             </td>
-        `;
+            `;
     });
 }
 
