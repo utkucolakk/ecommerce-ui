@@ -1,14 +1,15 @@
 const BASE_PATH = "http://localhost:8080/"
 const BASE_IMAGE_PATH = "/Users/utii/Documents/GitHub/ecommerce/"
-
 const jwtToken = localStorage.getItem('jwtToken');
+
+var currentId = 0;
 
 async function addProduct() {
     const fileInput = document.getElementById('productImage');
     const productName = document.getElementById('productName').value;
     const productPrice = document.getElementById('productPrice').value;
     const productUnitsInStock = document.getElementById('productUnitsInStock').value;
-    const productCategoryId = document.getElementById('productCategoryId').value; 
+    const productCategoryId = document.getElementById('productCategoryId').value;
     const productActive = document.getElementById('productActive').checked;
 
     const formData = new FormData();
@@ -35,7 +36,9 @@ async function addProduct() {
         if (!response.ok) {
             throw new Error("Product ekleme isteği başarısız durum kodu : " + response.status)
         }
-        return response.json()
+        hideModal('addProductModal');
+        clearModalValues();
+        getAllProduct();
     }).then(data => {
         console.log(data)
     }).catch(error => {
@@ -86,10 +89,30 @@ async function renderProductTable(productList) {
     });
 }
 
-function deleteProduct(productId) {
-    const confirmed = confirm("Are you sure you want to delete this product?");
-    if (confirmed) {
-        fetch(BASE_PATH + "product/" + productId, {
+function showDeleteProductModal(productId) {
+    currentId = productId;
+    const deleteProductModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteProductModal'))
+    deleteProductModal.show();
+}
+
+function hideModal(modalId) {
+    const deleteProductModal = bootstrap.Modal.getOrCreateInstance(document.getElementById(modalId))
+    deleteProductModal.hide();
+}
+
+
+function clearModalValues() { 
+    document.getElementById('productImage').value = '';
+    document.getElementById('productName').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productUnitsInStock').value = '';
+    document.getElementById('productCategoryId').value = '';
+    document.getElementById('productActive').checked = '';
+}
+
+function deleteProduct() {    
+    if (currentId !== 0) {
+        fetch(BASE_PATH + "product/" + currentId, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -99,6 +122,7 @@ function deleteProduct(productId) {
             if (!response.ok) {
                 throw new Error("Product silme isteği başarısız durum kodu : " + response.status)
             }
+            hideModal('deleteProductModal');
             getAllProduct();
         }).catch(error => {
             console.error('Error:', error);
@@ -114,7 +138,7 @@ function updateProduct(productId) {
             'Authorization': 'Bearer ' + jwtToken
         }
     }).then(response => {
-        if (!response.ok) { 
+        if (!response.ok) {
             throw new Error("Product getirme isteği başarısız durum kodu : " + response.status)
         }
         return response.json();
@@ -151,7 +175,7 @@ function saveUpdatedProduct() {
     };
 
     const formData = new FormData();
-    formData.append('file', feditedSelectedImage = updateProductImage.files[0]); 
+    formData.append('file', feditedSelectedImage = updateProductImage.files[0]);
     formData.append('product', new Blob([JSON.stringify(productData)], { type: 'application/json' }));
 
     fetch(BASE_PATH + "product/update", {
@@ -170,8 +194,6 @@ function saveUpdatedProduct() {
         console.error('Error:', error);
     });
 
-    //update modal'ı kapatmamız gerekiyor.
-    // $('#updateProductModal').modal('hide');
 }
 
 async function closeUpdateProductModal() {
