@@ -3,13 +3,14 @@ const BASE_IMAGE_PATH = "/Users/utii/Documents/GitHub/ecommerce/"
 const jwtToken = localStorage.getItem('jwtToken');
 
 var currentId = 0;
+var categories = [];
 
 async function addProduct() {
     const fileInput = document.getElementById('productImage');
     const productName = document.getElementById('productName').value;
     const productPrice = document.getElementById('productPrice').value;
     const productUnitsInStock = document.getElementById('productUnitsInStock').value;
-    const productCategoryId = document.getElementById('productCategoryId').value;
+    const productCategoryId = document.getElementById('categorySelect').value;
     const productActive = document.getElementById('productActive').checked;
 
     const formData = new FormData();
@@ -106,7 +107,7 @@ function clearModalValues() {
     document.getElementById('productName').value = '';
     document.getElementById('productPrice').value = '';
     document.getElementById('productUnitsInStock').value = '';
-    document.getElementById('productCategoryId').value = '';
+    document.getElementById('categorySelect').value = '';
     document.getElementById('productActive').checked = '';
 }
 
@@ -147,12 +148,23 @@ function updateProduct(productId) {
         document.getElementById('updateProductName').value = product.name;
         document.getElementById('updateProductPrice').value = product.price;
         document.getElementById('updateProductUnitsInStock').value = product.unitsInStock;
-        document.getElementById('updateProductCategoryId').value = product.categoryId;
+
+        sortCategoriesById(categories, product.categoryId)
+        renderCategorySelectOption(categories, 'updateCategorySelect');
+
         document.getElementById('updateProductActive').checked = product.active;
-        const updateProductModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('updateProductModal'));
+        const updateProductModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('updateProductModal')) // Returns a Bootstrap modal instance
         updateProductModal.show();
     }).catch(error => {
         console.error('Error:', error);
+    });
+}
+
+function sortCategoriesById(categories, targetId) {
+    return categories.sort((a, b) => {
+        if (a.id === targetId) return -1; // 'a' öğesi hedef id'ye sahipse, 'a' önce gelir.
+        if (b.id === targetId) return 1;  // 'b' öğesi hedef id'ye sahipse, 'b' sonra gelir.
+        return 0; // Diğer öğeler sıralı kalır.
     });
 }
 
@@ -196,6 +208,34 @@ function saveUpdatedProduct() {
 
 }
 
+async function getCategoryList() {
+    const response = await fetch(BASE_PATH + "category", {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + jwtToken
+        }
+    });
+    if (!response.ok) {
+        throw new Error("Failed to get categories, response status : " + response.status)
+    }
+    const categoryList = await response.json();
+    categories = categoryList;
+    renderCategorySelectOption(categoryList, "categorySelect");
+}
+
+function renderCategorySelectOption(categoryList, elementId) {
+    const categorySelect = document.getElementById(elementId);
+    categorySelect.innerHTML = ''; // öncedeki kategorileri temizle.
+
+    categoryList.forEach(category => {
+        const option = document.createElement("option");
+        option.value = category.id;
+        option.text = category.name;
+        categorySelect.appendChild(option);
+    });
+}
+
 async function closeUpdateProductModal() {
     const model = bootstrap.Modal.getOrCreateInstance(document.getElementById('updateProductModal'));
     model.hide();
@@ -203,4 +243,5 @@ async function closeUpdateProductModal() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     await getAllProduct();
+    await getCategoryList();
 });
